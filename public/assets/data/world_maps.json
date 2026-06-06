@@ -1,0 +1,373 @@
+{
+  "region_name": "HOENN_VUE",
+  "locations": {
+    "sproutwood_town": {
+      "name": "Sproutwood Town",
+      "original_reference": "Littleroot Town",
+      "description": "A small, cozy town surrounded by young, fresh greenery where journeys begin.",
+      "map_file": "sproutwood_town.json",
+      "has_gym": false
+    },
+    "orchard_crossing": {
+      "name": "Orchard Crossing",
+      "original_reference": "Oldale Town",
+      "description": "A simple waypoint known for its grassy pathways and wild fruit trees.",
+      "map_file": "orchard_crossing.json",
+      "has_gym": false
+    },
+    "bloomvale_city": {
+      "name": "Bloomvale City",
+      "original_reference": "Petalburg City",
+      "description": "A beautiful city situated at the edge of a dense, mysterious forest.",
+      "map_file": "bloomvale_city.json",
+      "has_gym": true,
+      "gym_leader": "NORMAN",
+      "badge": "Balance Badge"
+    },
+    "ironstone_city": {
+      "name": "Ironstone City",
+      "original_reference": "Rustboro City",
+      "description": "A grand, industrial city built entirely from stone blocks mined from nearby mountains.",
+      "map_file": "ironstone_city.json",
+      "has_gym": true,
+      "gym_leader": "ROXANNE",
+      "badge": "Stone Badge"
+    },
+    "brinecave_isle": {
+      "name": "Brinecave Isle",
+      "original_reference": "Dewford Town",
+      "description": "A rugged, isolated island famous for its deep, dark training caves and rough tides.",
+      "map_file": "brinecave_isle.json",
+      "has_gym": true,
+      "gym_leader": "BRAWLY",
+      "badge": "Knuckle Badge"
+    },
+    "mariners_marina": {
+      "name": "Mariner's Marina",
+      "original_reference": "Slateport City",
+      "description": "A massive, bustling coastal port with an open-air market and oceanic research labs.",
+      "map_file": "mariners_marina.json",
+      "has_gym": false
+    },
+    "ampere_city": {
+      "name": "Ampere City",
+      "original_reference": "Mauville City",
+      "description": "The central electric metropolis of the region, glowing with neon lights and high tech.",
+      "map_file": "ampere_city.json",
+      "has_gym": true,
+      "gym_leader": "WATTSON",
+      "badge": "Dynamo Badge"
+    },
+    "whisperwind_town": {
+      "name": "Whisperwind Town",
+      "original_reference": "Verdanturf Town",
+      "description": "A peaceful valley town praised for its clean, therapeutic air and wind tunnels.",
+      "map_file": "whisperwind_town.json",
+      "has_gym": false
+    },
+    "ashenfall_town": {
+      "name": "Ashenfall Town",
+      "original_reference": "Fallarbor Town",
+      "description": "A unique farming community where volcanic soot constantly rains down from the skies.",
+      "map_file": "ashenfall_town.json",
+      "has_gym": false
+    },
+    "geyser_thermal": {
+      "name": "Geyser Thermal",
+      "original_reference": "Lavaridge Town",
+      "description": "A mountain retreat nestled at the base of a volcano, famous for its steaming hot springs.",
+      "map_file": "geyser_thermal.json",
+      "has_gym": true,
+      "gym_leader": "FLANNERY",
+      "badge": "Heat Badge"
+    },
+    "skycanopy_city": {
+      "name": "Skycanopy City",
+      "original_reference": "Fortree City",
+      "description": "An eco-friendly settlement where the citizens live in advanced treehouses high above the ground.",
+      "map_file": "skycanopy_city.json",
+      "has_gym": true,
+      "gym_leader": "WINONA",
+      "badge": "Feather Badge"
+    },
+    "prismport_city": {
+      "name": "Prismport City",
+      "original_reference": "Lilycove City",
+      "description": "A massive cultural hub featuring a grand art museum, a mega department store, and contest halls.",
+      "map_file": "prismport_city.json",
+      "has_gym": false
+    },
+    "astro_horizon": {
+      "name": "Astro Horizon",
+      "original_reference": "Mossdeep City",
+      "description": "A sunny offshore island chosen specifically for its space research center and clear skies.",
+      "map_file": "astro_horizon.json",
+      "has_gym": true,
+      "gym_leader": "TATE & LIZA",
+      "badge": "Mind Badge"
+    },
+    "crater_oasis": {
+      "name": "Crater Oasis",
+      "original_reference": "Sootopolis City",
+      "description": "A magnificent city built completely inside the hollow chamber of a sunken, water-filled volcano.",
+      "map_file": "crater_oasis.json",
+      "has_gym": true,
+      "gym_leader": "WALLACE",
+      "badge": "Rain Badge"
+    },
+    "driftwood_float": {
+      "name": "Driftwood Float",
+      "original_reference": "Pacifidlog Town",
+      "description": "A quiet fishing village constructed entirely on floating wooden rafts over deep ocean currents.",
+      "map_file": "driftwood_float.json",
+      "has_gym": false
+    },
+    "summit_apex": {
+      "name": "Summit Apex",
+      "original_reference": "Ever Grande City",
+      "description": "The highest mountain plateau in the region, home to the ultimate challenge: the Pokémon League.",
+      "map_file": "summit_apex.json",
+      "has_gym": false
+    }
+  },
+  "routes": {
+    "route_101": {
+      "name": "Route 101",
+      "connections": ["sproutwood_town", "orchard_crossing"],
+      "description": "A short, forested path filled with low-level wild Pokémon. Ideal for beginner trainers.",
+      "map_file": "route_101.json",
+      "features": ["tall_grass", "ledges"]
+    },
+    "route_102": {
+      "name": "Route 102",
+      "connections": ["orchard_crossing", "bloomvale_city"],
+      "description": "A scenic route running alongside a small pond, guarded by novice trainers.",
+      "map_file": "route_102.json",
+      "features": ["tall_grass", "pond", "berry_trees"]
+    },
+    "route_103": {
+      "name": "Route 103",
+      "connections": ["orchard_crossing", "route_110"],
+      "description": "A dirt path blocked by a large sea inlet, requiring Surf to fully cross over.",
+      "map_file": "route_103.json",
+      "features": ["tall_grass", "sea_water"]
+    },
+    "route_104": {
+      "name": "Route 104",
+      "connections": ["bloomvale_city", "ironstone_city"],
+      "description": "A beautiful coastal path split in half by a massive, deep forest zone.",
+      "map_file": "route_104.json",
+      "features": ["beach_sand", "tall_grass", "petalburg_woods_entrance"]
+    },
+    "route_105": {
+      "name": "Route 105",
+      "connections": ["ironstone_city", "brinecave_isle"],
+      "description": "A treacherous water highway plagued by shifting ocean currents and hidden reefs.",
+      "map_file": "route_105.json",
+      "features": ["ocean_water", "islands"]
+    },
+    "route_106": {
+      "name": "Route 106",
+      "connections": ["brinecave_isle", "route_105"],
+      "description": "A coastal sandy strip leading directly to the entrance of Granite Cave.",
+      "map_file": "route_106.json",
+      "features": ["beach_sand", "ocean_water", "cave_entrance"]
+    },
+    "route_107": {
+      "name": "Route 107",
+      "connections": ["brinecave_isle", "route_108"],
+      "description": "A wide oceanic passage stretching eastward through open waters.",
+      "map_file": "route_107.json",
+      "features": ["ocean_water"]
+    },
+    "route_108": {
+      "name": "Route 108",
+      "connections": ["route_107", "route_109"],
+      "description": "An open water channel housing the half-sunken ruins of an old container ship.",
+      "map_file": "route_108.json",
+      "features": ["ocean_water", "abandoned_ship"]
+    },
+    "route_109": {
+      "name": "Route 109",
+      "connections": ["route_108", "mariners_marina"],
+      "description": "A popular resort beach crowded with vacationing trainers and pop-up battle tents.",
+      "map_file": "route_109.json",
+      "features": ["beach_sand", "shallow_water"]
+    },
+    "route_110": {
+      "name": "Route 110",
+      "connections": ["mariners_marina", "ampere_city"],
+      "description": "A long highway featuring a seaside walking path on the bottom and a massive Cycling Road overhead.",
+      "map_file": "route_110.json",
+      "features": ["tall_grass", "cycling_road_gate", "sea_water"]
+    },
+    "route_111": {
+      "name": "Route 111",
+      "connections": ["ampere_city", "route_112"],
+      "description": "A harsh desert route requiring special goggles to bypass the constant sandstorms.",
+      "map_file": "route_111.json",
+      "features": ["desert_sand", "sandstorm", "rocks"]
+    },
+    "route_112": {
+      "name": "Route 112",
+      "connections": ["route_111", "geyser_thermal"],
+      "description": "A jagged mountain trail leading directly to the foot of the volcanic cable car station.",
+      "map_file": "route_112.json",
+      "features": ["mountain_path", "cable_car_station"]
+    },
+    "route_113": {
+      "name": "Route 113",
+      "connections": ["route_111", "ashenfall_town"],
+      "description": "A desolate path covered completely in pale ash drifting down from Mt. Chimney.",
+      "map_file": "route_113.json",
+      "features": ["volcanic_ash", "tall_grass"]
+    },
+    "route_114": {
+      "name": "Route 114",
+      "connections": ["ashenfall_town", "route_115"],
+      "description": "A scenic mountain trail passing by a roaring waterfall and the entrance of Meteor Falls.",
+      "map_file": "route_114.json",
+      "features": ["mountain_path", "waterfall", "lake"]
+    },
+    "route_115": {
+      "name": "Route 115",
+      "connections": ["route_114", "ironstone_city"],
+      "description": "A coastal cliff route that loops around mountain paths back to the industrial sector.",
+      "map_file": "route_115.json",
+      "features": ["beach_sand", "mountain_ledges"]
+    },
+    "route_116": {
+      "name": "Route 116",
+      "connections": ["ironstone_city", "whisperwind_town"],
+      "description": "A grassy pathway built by miners heading toward a half-finished tunnel construction site.",
+      "map_file": "route_116.json",
+      "features": ["tall_grass", "tunnel_entrance"]
+    },
+    "route_117": {
+      "name": "Route 117",
+      "connections": ["ampere_city", "whisperwind_town"],
+      "description": "A short, beautiful meadow path widely known for hosting the region's Pokémon Daycare.",
+      "map_file": "route_117.json",
+      "features": ["tall_grass", "daycare", "flower_beds"]
+    },
+    "route_118": {
+      "name": "Route 118",
+      "connections": ["ampere_city", "route_119"],
+      "description": "A sandy riverbank where trainers must cross a narrow stream to access the eastern territories.",
+      "map_file": "route_118.json",
+      "features": ["river_water", "beach_sand", "tall_grass"]
+    },
+    "route_119": {
+      "name": "Route 119",
+      "connections": ["route_118", "skycanopy_city"],
+      "description": "A massive, dense rainforest route with a long river and grass taller than the trainer.",
+      "map_file": "route_119.json",
+      "features": ["super_tall_grass", "river_water", "weather_institute"]
+    },
+    "route_120": {
+      "name": "Route 120",
+      "connections": ["skycanopy_city", "route_121"],
+      "description": "A misty, plateau route known for giant puddles that reflect the night sky like mirrors.",
+      "map_file": "route_120.json",
+      "features": ["tall_grass", "reflective_puddles", "bridges"]
+    },
+    "route_121": {
+      "name": "Route 121",
+      "connections": ["route_120", "prismport_city"],
+      "description": "A long, guarded highway that serves as the main entrance gate to the grand Safari Zone.",
+      "map_file": "route_121.json",
+      "features": ["tall_grass", "safari_zone_entrance"]
+    },
+    "route_122": {
+      "name": "Route 121",
+      "connections": ["route_121", "route_123"],
+      "description": "A small water channel circling a giant, hollow mountain used as a memorial ground.",
+      "map_file": "route_122.json",
+      "features": ["ocean_water", "mountain_island"]
+    },
+    "route_123": {
+      "name": "Route 122",
+      "connections": ["route_122", "route_118"],
+      "description": "A secluded, ledge-filled path where the region's master berry horticulturist resides.",
+      "map_file": "route_123.json",
+      "features": ["tall_grass", "berry_master_house", "ledges"]
+    },
+    "route_124": {
+      "name": "Route 124",
+      "connections": ["prismport_city", "astro_horizon"],
+      "description": "A vast, deep sea highway that conceals structural trenches underneath its surface.",
+      "map_file": "route_124.json",
+      "features": ["deep_ocean_water", "dive_spots"]
+    },
+    "route_125": {
+      "name": "Route 125",
+      "connections": ["astro_horizon"],
+      "description": "A cold, northern sea loop that leads directly into the freezing chambers of Shoal Cave.",
+      "map_file": "route_125.json",
+      "features": ["ocean_water", "shoal_cave_entrance"]
+    },
+    "route_126": {
+      "name": "Route 126",
+      "connections": ["route_124", "crater_oasis"],
+      "description": "A massive ocean loop surrounding a towering volcanic rock wall.",
+      "map_file": "route_126.json",
+      "features": ["deep_ocean_water", "underwater_trench"]
+    },
+    "route_127": {
+      "name": "Route 127",
+      "connections": ["astro_horizon", "route_128"],
+      "description": "A deep-water path packed with rugged crags and vertical rocky cliffs.",
+      "map_file": "route_127.json",
+      "features": ["deep_ocean_water", "islands"]
+    },
+    "route_128": {
+      "name": "Route 127",
+      "connections": ["route_127", "summit_apex"],
+      "description": "The oceanic crossroads where the deepest oceanic abyss hides a forgotten cavern entrance.",
+      "map_file": "route_128.json",
+      "features": ["deep_ocean_water", "seafloor_cavern_trigger"]
+    },
+    "route_129": {
+      "name": "Route 129",
+      "connections": ["route_128", "route_130"],
+      "description": "An open ocean route populated by many highly skilled, elite marine swimming trainers.",
+      "map_file": "route_129.json",
+      "features": ["open_ocean_water"]
+    },
+    "route_130": {
+      "name": "Route 129",
+      "connections": ["route_129", "route_131"],
+      "description": "A mysterious stretch of ocean where a magical phantom island occasionally appears.",
+      "map_file": "route_130.json",
+      "features": ["ocean_water", "mirage_island_trigger"]
+    },
+    "route_131": {
+      "name": "Route 131",
+      "connections": ["route_130", "driftwood_float"],
+      "description": "A calm, reef-guarded ocean stretch where a titanic ancient pillar touches the heavens.",
+      "map_file": "route_131.json",
+      "features": ["ocean_water", "sky_pillar_entrance"]
+    },
+    "route_132": {
+      "name": "Route 132",
+      "connections": ["driftwood_float", "route_133"],
+      "description": "A dangerous ocean channel containing violent, uncontrollable water rapids.",
+      "map_file": "route_132.json",
+      "features": ["rapid_water_currents"]
+    },
+    "route_133": {
+      "name": "Route 133",
+      "connections": ["route_132", "route_134"],
+      "description": "A complex web of fast rapids forcing travelers to make split-second navigational choices.",
+      "map_file": "route_133.json",
+      "features": ["rapid_water_currents"]
+    },
+    "route_134": {
+      "name": "Route 134",
+      "connections": ["route_133", "mariners_marina"],
+      "description": "The final stretch of rapid water currents hiding a secret dive spot to an ancient text chamber.",
+      "map_file": "route_134.json",
+      "features": ["rapid_water_currents", "sealed_chamber_dive"]
+    }
+  }
+}
