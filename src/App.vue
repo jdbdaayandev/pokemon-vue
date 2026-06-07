@@ -20,6 +20,7 @@
 
     <!-- 2. VUE UI LAYER -->
     <div id="ui-layer">
+      <DialogueBox />
       <!-- NAME INPUT BOX -->
       <div v-if="showNameInput" class="name-input-modal">
         <div class="modal-content">
@@ -44,6 +45,7 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import Phaser from 'phaser';
 import { gameConfig } from './game/config';
+import DialogueBox from './components/DialogueBox.vue';
 
 let gameInstance = null;
 const showNameInput = ref(false);
@@ -68,7 +70,9 @@ onBeforeUnmount(() => {
 const confirmName = () => {
   if (tempName.value.trim() !== '') {
     showNameInput.value = false;
-    alert(`Welcome to Hoenn, ${tempName.value}! (Susunod ang Overworld Scene)`);
+    
+    // ITO ANG KULANG: Magpadala ng signal sa Phaser na tapos na ang pangalan
+    window.dispatchEvent(new CustomEvent('start-game'));
   }
 };
 </script>

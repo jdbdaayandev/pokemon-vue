@@ -1,0 +1,18 @@
+{
+  "npc_1": {
+    "name": "Guide Guy",
+    "texture": "npc_1",
+    "dialogue": [
+      "Welcome to Sproutwood Town!",
+      "Don't go into the tall grass without a Pokémon."
+    ]
+  },
+  "fat_guy": {
+    "name": "Tech Enthusiast",
+    "texture": "npc_2",
+    "dialogue": [
+      "Technology is incredible!",
+      "You can now store items and Pokémon as data via PC!"
+    ]
+  }
+}

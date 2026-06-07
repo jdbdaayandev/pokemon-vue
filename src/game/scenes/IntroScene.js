@@ -48,13 +48,27 @@ export class IntroScene extends Phaser.Scene {
 
     this.input.keyboard.on('keydown-ENTER', () => this.handleInput());
     this.input.on('pointerdown', () => this.handleInput());
+
+    // 3. EVENT LISTENER MULA SA VUE
+    // Dito tayo makikinig kapag pinindot na ng player ang "OK" sa Name Input form
+    this.startGameListener = (event) => {
+      // Tanggalin ang listener pagkatapos magamit para hindi magka-memory leak
+      window.removeEventListener('start-game', this.startGameListener);
+      
+      // Simulan na ang laro sa Sproutwood Town!
+      this.scene.start('OverworldScene');
+    };
+
+    window.addEventListener('start-game', this.startGameListener);
   }
 
-  // --- (Mananatili dito yung dating typewriter at handleInput functions natin) ---
+  // --- TYPEWRITER FUNCTIONS ---
   showNextDialogue() {
     if (this.currentDialogueIndex >= this.dialogues.length) {
         this.birchSprite.setVisible(false);
         this.dialogueText.setText('');
+        
+        // I-trigger ang Vue Name Input Box
         window.dispatchEvent(new CustomEvent('show-name-input'));
         return;
     }
