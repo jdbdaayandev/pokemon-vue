@@ -49,6 +49,8 @@ export class PreloadScene extends Phaser.Scene {
 
   // I-load ang JSON file
   this.load.json('npcData', '/assets/data/npcs.json');
+
+  this.load.json('eventData', 'assets/data/events.json');
   }
 
   create() {

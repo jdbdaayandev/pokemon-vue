@@ -95,6 +95,25 @@
                  "width":0,
                  "x":87.3333333333333,
                  "y":141.333333333333
+                }, 
+                {
+                 "height":0,
+                 "id":7,
+                 "name":"",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"npcId",
+                         "type":"string",
+                         "value":"mom"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":343.333333333333,
+                 "y":152.666666666667
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -134,7 +153,7 @@
          "y":0
         }],
  "nextlayerid":6,
- "nextobjectid":7,
+ "nextobjectid":26,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.2",
@@ -143,6 +162,19 @@
         {
          "columns":88,
          "firstgid":1,
+         "image":"exterior_tileset.png",
+         "imageheight":1104,
+         "imagewidth":1408,
+         "margin":0,
+         "name":"exterior_tileset",
+         "spacing":0,
+         "tilecount":6072,
+         "tileheight":16,
+         "tilewidth":16
+        }, 
+        {
+         "columns":88,
+         "firstgid":6073,
          "image":"exterior_tileset.png",
          "imageheight":1104,
          "imagewidth":1408,
