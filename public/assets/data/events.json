@@ -1,0 +1,18 @@
+{
+  "mom_intro": [
+    { "action": "lock_player" },
+    { "action": "spawn_npc", "npcId": "mom", "texture": "npc_1", "offsetX": 100, "offsetY": -50 },
+    { "target": "mom", "action": "walk_down", "distance": 16 },
+    { "target": "mom", "action": "walk_left", "distance": 100 },
+    { "target": "mom", "action": "face_up" },
+    { "action": "dialogue", "speaker": "MOM", "text": [
+      "Oh, {playerName}! Mayroon ka palang laro sa iyong handheld?", 
+      "Naku, late ka na sa usapan ninyo!",
+      "Kingina mo!"
+    ] },
+    { "target": "mom", "action": "walk_right", "distance": 100 },
+    { "target": "mom", "action": "walk_up", "distance": 16 },
+    { "action": "destroy", "target": "mom" },
+    { "action": "unlock_player" }
+  ]
+}
