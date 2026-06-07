@@ -8,6 +8,7 @@ import { TitleScene } from './scenes/TitleScene';
 import { MainMenuScene } from './scenes/MainMenuScene';
 import { IntroScene } from './scenes/IntroScene';
 import { OverworldScene } from './scenes/OverworldScene';
+import { Route1Scene } from './scenes/Route1Scene'; // 🔴 1. IDINAGDAG ANG IMPORT NG BAGONG MAPA
 
 export const gameConfig = {
   type: Phaser.AUTO,
@@ -15,7 +16,7 @@ export const gameConfig = {
   pixelArt: true,
   roundPixels: false,
   
-  // 🔴 BAGONG CODE: Dito dapat nakalagay ang width, height, at FIT mode!
+  // 🔴 Dito dapat nakalagay ang width, height, at FIT mode!
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
@@ -23,6 +24,7 @@ export const gameConfig = {
     height: 600
   },
 
+  // (Nilinis ko ito, tinanggal ko yung duplicate block)
   physics: {
     default: 'arcade',
     arcade: {
@@ -35,13 +37,9 @@ export const gameConfig = {
     gamepad: true 
   },
 
-  physics: {
-    default: 'arcade',
-    arcade: { gravity: { y: 0 }, debug: false }
-  },
   audio: { noAudio: true },
   
-  // LAHAT SILA DAPAT NANDITO (Ang BootScene ang una)
+  // LAHAT SILA DAPAT NANDITO
   scene: [
     BootScene, 
     PreloadScene, 
@@ -49,6 +47,7 @@ export const gameConfig = {
     TitleScene, 
     MainMenuScene, 
     IntroScene, 
-    OverworldScene
+    OverworldScene,
+    Route1Scene // 🔴 2. IDINAGDAG SA ARRAY NG SCENES
   ], 
 };

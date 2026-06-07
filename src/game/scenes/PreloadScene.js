@@ -34,6 +34,7 @@ export class PreloadScene extends Phaser.Scene {
     // 3. LOAD TILEMAPS (Para sa unang bayan: Sproutwood Town)
     this.load.image('tiles', '/assets/tilemaps/exterior_tileset.png');
     this.load.tilemapTiledJSON('sproutwood_town', '/assets/tilemaps/sproutwood_town.json');
+    this.load.tilemapTiledJSON('route_1', '/assets/tilemaps/route_101.json');
 
     // 4. LOAD PLAYER SPRITESHEET
     // *PAALALA: Kung ang sukat ng frames mo ay iba (hal. 32x48 o 32x32), palitan lang ang numbers sa ibaba*
@@ -43,6 +44,10 @@ export class PreloadScene extends Phaser.Scene {
     });
 
     this.load.spritesheet('npc_1', '/assets/sprites/npc/npc_1.png', {
+    frameWidth: 16,
+    frameHeight: 32
+  });
+  this.load.spritesheet('npc_2', '/assets/sprites/npc/npc_2.png', {
     frameWidth: 16,
     frameHeight: 32
   });
