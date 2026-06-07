@@ -10,7 +10,8 @@ export class NPC extends Phaser.GameObjects.Sprite {
     this.collisionLayer = collisionLayer;
     
     // Parehas na setup sa Player para pantay ang sukat at pwesto sa Grid
-    this.setDepth(4); 
+    //this.setDepth(4); 
+    this.setDepth(this.y);
     this.setScale(1);
     this.setOrigin(0.5, 0.75);
 
@@ -25,6 +26,9 @@ export class NPC extends Phaser.GameObjects.Sprite {
     
     this.createAnimations(scene);
     this.faceDirection(this.currentDirection);
+
+    this.targetX = x;
+    this.targetY = y;
   }
 
   update() {
@@ -67,30 +71,35 @@ export class NPC extends Phaser.GameObjects.Sprite {
   }
 
   canMoveTo(targetX, targetY) {
-    // 1. I-check kung may pader
     const tile = this.collisionLayer.getTileAtWorldXY(targetX, targetY, true);
     if (tile === null || tile.index !== -1) return false;
 
-    // 2. LIGTAS NA CODE: I-check kung naroon ang Player (Brendan) gamit ang Math.abs
-    if (Math.abs(this.scene.player.x - targetX) < 1 && Math.abs(this.scene.player.y - targetY) < 1) {
-        return false; 
-    }
+    const p = this.scene.player;
 
-    // 3. LIGTAS NA CODE: I-check kung may ibang NPC sa tile gamit ang ?. at Math.abs
-    const hasOtherNPC = this.scene.npcs?.some(otherNpc => 
-        otherNpc !== this && 
-        Math.abs(otherNpc.x - targetX) < 1 && 
-        Math.abs(otherNpc.y - targetY) < 1
-    );
-    if (hasOtherNPC) {
-        return false; 
-    }
+    // 🔴 BAGONG CODE: I-check kung nakatayo si Brendan o papunta siya sa tile
+    const playerStanding = Math.abs(p.x - targetX) < 1 && Math.abs(p.y - targetY) < 1;
+    const playerGoing = Math.abs(p.targetX - targetX) < 1 && Math.abs(p.targetY - targetY) < 1;
+    if (playerStanding || playerGoing) return false; 
+
+    // 🔴 BAGONG CODE: I-check ang ibang NPC
+    const hasOtherNPC = this.scene.npcs?.some(otherNpc => {
+        if (otherNpc === this) return false;
+        const npcStanding = Math.abs(otherNpc.x - targetX) < 1 && Math.abs(otherNpc.y - targetY) < 1;
+        const npcGoing = Math.abs(otherNpc.targetX - targetX) < 1 && Math.abs(otherNpc.targetY - targetY) < 1;
+        return npcStanding || npcGoing;
+    });
+
+    if (hasOtherNPC) return false; 
 
     return true;
   }
 
   moveTo(targetX, targetY) {
     this.isMoving = true;
+
+    // 🔴 BAGONG CODE: I-reserve ni NPC ang tile
+    this.targetX = targetX;
+    this.targetY = targetY;
 
     this.scene.tweens.add({
       targets: this,

@@ -3,6 +3,7 @@
     "name": "Guide Guy",
     "texture": "npc_1",
     "dialogue": [
+      "Hi!, {playerName}",
       "Welcome to Sproutwood Town!",
       "Don't go into the tall grass without a Pokémon."
     ]
@@ -13,6 +14,15 @@
     "dialogue": [
       "Technology is incredible!",
       "You can now store items and Pokémon as data via PC!"
+    ]
+  },
+  "mom": {
+    "name": "Mom",
+    "texture": "npc_mom",
+    "dialogue": [
+      "{playerName}! Wake up!",
+      "Professor Birch has been waiting for you at his lab.",
+      "Take care on the very first day of your adventure!"
     ]
   }
 }

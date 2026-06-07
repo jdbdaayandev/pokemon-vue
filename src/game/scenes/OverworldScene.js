@@ -19,7 +19,7 @@ export class OverworldScene extends Phaser.Scene {
     const collisionLayer = map.createLayer('Collission', tileset, 0, 0);
     const overheadLayer = map.createLayer('Overhead', tileset, 0, 0);
     
-    overheadLayer.setDepth(10); 
+    overheadLayer.setDepth(9999); 
     collisionLayer.setVisible(false);
 
     this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
@@ -38,9 +38,13 @@ export class OverworldScene extends Phaser.Scene {
     
     const allNpcData = this.cache.json.get('npcData');
 
+    console.log("Laman ng JSON:", allNpcData);
+
     if (npcLayer) {
       npcLayer.objects.forEach(npcObj => {
-        const npcId = npcObj.properties?.find(p => p.name === 'npcId')?.value;
+        //const npcId = npcObj.properties?.find(p => p.name === 'npcId')?.value;
+        // PAPUNTA RITO:
+        const npcId = npcObj.properties?.find(p => p.name === 'npcId' || p.name === 'texture')?.value;
 
         const data = (allNpcData && allNpcData[npcId]) 
             ? allNpcData[npcId] 

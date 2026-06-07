@@ -4,27 +4,78 @@
       <div class="npc-name">{{ store.dialogue.name }}</div>
       
       <div class="npc-text">
-        {{ store.dialogue.lines[store.dialogue.currentLine] }}
+        {{ displayedText }}
       </div>
       
-      <div class="blinking-arrow" v-if="hasNextLine || isLastLine">▼</div>
+      <div class="blinking-arrow" v-if="!store.dialogue.isTyping && (hasNextLine || isLastLine)">▼</div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { ref, watch, computed, onBeforeUnmount } from 'vue';
 import { useGameStore } from '../stores/gameStore';
 
 const store = useGameStore();
+const displayedText = ref(''); // Ang lalabas na text sa screen
+let typewriterInterval = null;
 
-// Para malaman kung may susunod pang pahina o kung ito na ang dulo
+// Kunin ang buong string na dapat i-type
+const currentFullText = computed(() => {
+  if (!store.dialogue.isOpen || store.dialogue.lines.length === 0) return '';
+  return store.dialogue.lines[store.dialogue.currentLine];
+});
+
 const hasNextLine = computed(() => store.dialogue.currentLine < store.dialogue.lines.length - 1);
 const isLastLine = computed(() => store.dialogue.currentLine === store.dialogue.lines.length - 1);
+
+// --- 🔴 TYPEWRITER CORE LOGIC ---
+const startTypewriter = () => {
+  clearInterval(typewriterInterval); // Linisin ang lumang timer kung meron man
+  displayedText.value = '';
+  
+  if (!currentFullText.value) return;
+
+  let index = 0;
+  const typingSpeed = 30; // Bilis ng bawat letra sa milliseconds (30ms ay saktong GBA speed)
+
+  typewriterInterval = setInterval(() => {
+    if (index < currentFullText.value.length) {
+      displayedText.value += currentFullText.value[index];
+      index++;
+    } else {
+      // Kapag natapos na ang lahat ng letra nang kusa
+      clearInterval(typewriterInterval);
+      store.dialogue.isTyping = false; 
+    }
+  }, typingSpeed);
+};
+
+// Bantayan kung lumipat ng linya o kakabukas lang ng dialogue box
+watch([() => store.dialogue.currentLine, () => store.dialogue.isOpen], () => {
+  if (store.dialogue.isOpen) {
+    startTypewriter();
+  } else {
+    clearInterval(typewriterInterval);
+    displayedText.value = '';
+  }
+},{ immediate: true });
+
+// Bantayan kung pinilit patigilin ng Player ang pagta-type (Instant Complete Shortcut)
+watch(() => store.dialogue.isTyping, (newVal) => {
+  if (!newVal) {
+    clearInterval(typewriterInterval);
+    displayedText.value = currentFullText.value; // Ipakita agad ang buong text
+  }
+});
+
+// Siguraduhing walang tatagas na timer kapag nawala ang component
+onBeforeUnmount(() => {
+  clearInterval(typewriterInterval);
+});
 </script>
 
 <style scoped>
-/* Pwesto ng container sa pinakababa ng UI layer */
 .dialogue-container {
   position: absolute;
   bottom: 20px;
@@ -33,10 +84,9 @@ const isLastLine = computed(() => store.dialogue.currentLine === store.dialogue.
   width: 90%;
   max-width: 720px;
   z-index: 100;
-  pointer-events: auto; /* Para pwede i-click kung gagawin mong clickable sa susunod */
+  pointer-events: auto;
 }
 
-/* Istilo na parang GBA Pokémon Text Box */
 .dialogue-box {
   background-color: #f8f8f8;
   border: 4px solid #606060;
@@ -44,11 +94,10 @@ const isLastLine = computed(() => store.dialogue.currentLine === store.dialogue.
   padding: 16px 24px;
   box-shadow: inset 0 0 0 4px #d8d8d8, 0 8px 16px rgba(0,0,0,0.5);
   position: relative;
-  font-family: 'Press Start 2P', monospace; /* Gamitin natin ang retro font mo! */
-  min-height: 120px; /* Sakto para sa 2-3 linya ng text */
+  font-family: 'Press Start 2P', monospace;
+  min-height: 120px;
 }
 
-/* Pangalan ng NPC na kulay pula/asul para madaling makita */
 .npc-name {
   font-size: 14px;
   color: #e53935;
@@ -57,14 +106,12 @@ const isLastLine = computed(() => store.dialogue.currentLine === store.dialogue.
   text-shadow: 1px 1px 0px #ccc;
 }
 
-/* Mismong text ng dialogue */
 .npc-text {
   font-size: 14px;
   color: #303030;
   line-height: 1.8;
 }
 
-/* Kumukurap na arrow sa kanang ibaba */
 .blinking-arrow {
   position: absolute;
   bottom: 15px;

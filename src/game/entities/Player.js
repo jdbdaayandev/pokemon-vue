@@ -10,7 +10,7 @@ export class Player extends Phaser.GameObjects.Sprite {
     
     this.collisionLayer = collisionLayer;
     this.setDepth(5); 
-    this.setScale(1); 
+    this.setDepth(this.y);
     this.setOrigin(0.5, 0.75);
 
     // --- KEYBOARD INPUTS ---
@@ -39,31 +39,91 @@ export class Player extends Phaser.GameObjects.Sprite {
     // ACTION KEYS
     this.interactKey = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z);
     this.spaceKey = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+    this.enterKey = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
+
+    this.targetX = x;
+    this.targetY = y;
   }
 
   update() {
+    this.setDepth(this.y);
     const store = useGameStore();
+    
+    // 🎮 SAFE CHECK: Kunin ang Gamepad kung naka-connect na
+    const pad = this.scene.input.gamepad ? this.scene.input.gamepad.pad1 : null;
 
     // ==========================================
-    // 1. DIALOGUE LOCK (Bagong Code)
+    // 🔴 UNIVERSAL INPUT FLAGS (Keyboard + Touch UI + USB Gamepad)
     // ==========================================
-    // Kung nakabukas ang dialogue box sa Vue...
+    const isStartPressed = Phaser.Input.Keyboard.JustDown(this.enterKey) || store.keys.start || (pad && pad.start);
+    const isActionPressed = Phaser.Input.Keyboard.JustDown(this.interactKey) || Phaser.Input.Keyboard.JustDown(this.spaceKey) || store.keys.action || (pad && pad.A);
+    const isCancelPressed = store.keys.cancel || (pad && pad.B);
+
+    const isUpPressed = this.cursors.up.isDown || this.wasd.up.isDown || store.keys.up || (pad && (pad.up || pad.leftStick.y < -0.5));
+    const isDownPressed = this.cursors.down.isDown || this.wasd.down.isDown || store.keys.down || (pad && (pad.down || pad.leftStick.y > 0.5));
+    const isLeftPressed = this.cursors.left.isDown || this.wasd.left.isDown || store.keys.left || (pad && (pad.left || pad.leftStick.x < -0.5));
+    const isRightPressed = this.cursors.right.isDown || this.wasd.right.isDown || store.keys.right || (pad && (pad.right || pad.leftStick.x > 0.5));
+
+    // ==========================================
+    // 1. START MENU TOGGLE
+    // ==========================================
+    if (isStartPressed) {
+      if (this.scene.time.now - (this.lastClickTime || 0) < 200) return; // Anti-spam delay
+      this.lastClickTime = this.scene.time.now;
+      
+      store.keys.start = false; 
+      store.toggleMenu();
+      this.scene.sound.play('click');
+      return; 
+    }
+
+    // ==========================================
+    // 2. KUNG NAKABUKAS ANG START MENU
+    // ==========================================
+    if (store.menu.isOpen) {
+      if (this.scene.time.now - (this.lastMenuTime || 0) > 150) {
+        if (isUpPressed) {
+            store.moveMenuUp();
+            this.scene.sound.play('click');
+            this.lastMenuTime = this.scene.time.now;
+        } else if (isDownPressed) {
+            store.moveMenuDown();
+            this.scene.sound.play('click');
+            this.lastMenuTime = this.scene.time.now;
+        } else if (isActionPressed) {
+            store.selectMenu();
+            this.scene.sound.play('click');
+            this.lastMenuTime = this.scene.time.now;
+            store.keys.action = false;
+        } else if (isCancelPressed) {
+            store.toggleMenu(); 
+            this.scene.sound.play('click');
+            this.lastMenuTime = this.scene.time.now;
+            store.keys.cancel = false;
+        }
+      }
+      return; // PIGILAN ANG PAGLALAKAD kapag nasa menu!
+    }
+
+    // ==========================================
+    // 3. DIALOGUE LOCK
+    // ==========================================
     if (store.dialogue?.isOpen) {
-      // At pinindot ng player ang 'Z' o 'Spacebar'...
-      if (Phaser.Input.Keyboard.JustDown(this.interactKey) || Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
-          store.nextDialogue(); // I-next ang linya ng dialogue
+      if (isActionPressed) {
+          store.nextDialogue(); 
+          store.keys.action = false; // Reset UI click
       }
       return; // PIGILAN ANG PAGLALAKAD habang bukas ang dialogue
     }
 
     // ==========================================
-    // 2. MOVEMENT & INTERACTION
+    // 4. MOVEMENT & INTERACTION
     // ==========================================
     if (this.isMoving) return;
 
-    // Likumin ang interaction (Kung nakasara ang dialogue)
-    if (Phaser.Input.Keyboard.JustDown(this.interactKey) || Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
+    if (isActionPressed) {
         this.checkForInteract();
+        store.keys.action = false;
         return; 
     }
 
@@ -71,10 +131,10 @@ export class Player extends Phaser.GameObjects.Sprite {
     let targetX = this.x;
     let targetY = this.y;
 
-    if (this.cursors.left.isDown || this.wasd.left.isDown || store.keys?.left) intendedDirection = 'left';
-    else if (this.cursors.right.isDown || this.wasd.right.isDown || store.keys?.right) intendedDirection = 'right';
-    else if (this.cursors.up.isDown || this.wasd.up.isDown || store.keys?.up) intendedDirection = 'up';
-    else if (this.cursors.down.isDown || this.wasd.down.isDown || store.keys?.down) intendedDirection = 'down';
+    if (isLeftPressed) intendedDirection = 'left';
+    else if (isRightPressed) intendedDirection = 'right';
+    else if (isUpPressed) intendedDirection = 'up';
+    else if (isDownPressed) intendedDirection = 'down';
 
     if (intendedDirection === 'left') targetX -= this.tileSize;
     else if (intendedDirection === 'right') targetX += this.tileSize;
@@ -112,12 +172,15 @@ export class Player extends Phaser.GameObjects.Sprite {
   }
 
   canMoveTo(targetX, targetY) {
-    // 1. I-check kung may pader sa Tiled
     const tile = this.collisionLayer.getTileAtWorldXY(targetX, targetY, true);
     if (tile === null || tile.index !== -1) return false; 
 
-    // 2. I-check kung may nakaharang na NPC (Ligtas na collision check)
-    const hasNPC = this.scene.npcs?.some(npc => Math.abs(npc.x - targetX) < 1 && Math.abs(npc.y - targetY) < 1);
+    const hasNPC = this.scene.npcs?.some(npc => {
+        const isStandingThere = Math.abs(npc.x - targetX) < 1 && Math.abs(npc.y - targetY) < 1;
+        const isGoingThere = Math.abs(npc.targetX - targetX) < 1 && Math.abs(npc.targetY - targetY) < 1;
+        return isStandingThere || isGoingThere; 
+    });
+    
     if (hasNPC) return false; 
 
     return true; 
@@ -125,6 +188,8 @@ export class Player extends Phaser.GameObjects.Sprite {
 
   moveTo(targetX, targetY) {
     this.isMoving = true;
+    this.targetX = targetX;
+    this.targetY = targetY;
     const store = useGameStore(); 
 
     this.scene.tweens.add({
@@ -135,12 +200,14 @@ export class Player extends Phaser.GameObjects.Sprite {
       onComplete: () => {
         this.isMoving = false;
         
-        const isLeftPressed = this.cursors.left.isDown || this.wasd.left.isDown || store.keys?.left;
-        const isRightPressed = this.cursors.right.isDown || this.wasd.right.isDown || store.keys?.right;
-        const isUpPressed = this.cursors.up.isDown || this.wasd.up.isDown || store.keys?.up;
-        const isDownPressed = this.cursors.down.isDown || this.wasd.down.isDown || store.keys?.down;
+        // 🎮 Basahin ulit nang mabilisan kung may nakadiin pa ba na button pagkashift
+        const pad = this.scene.input.gamepad ? this.scene.input.gamepad.pad1 : null;
+        const isLeftStillPressed = this.cursors.left.isDown || this.wasd.left.isDown || store.keys?.left || (pad && (pad.left || pad.leftStick.x < -0.5));
+        const isRightStillPressed = this.cursors.right.isDown || this.wasd.right.isDown || store.keys?.right || (pad && (pad.right || pad.leftStick.x > 0.5));
+        const isUpStillPressed = this.cursors.up.isDown || this.wasd.up.isDown || store.keys?.up || (pad && (pad.up || pad.leftStick.y < -0.5));
+        const isDownStillPressed = this.cursors.down.isDown || this.wasd.down.isDown || store.keys?.down || (pad && (pad.down || pad.leftStick.y > 0.5));
 
-        if (!isLeftPressed && !isRightPressed && !isUpPressed && !isDownPressed) {
+        if (!isLeftStillPressed && !isRightStillPressed && !isUpStillPressed && !isDownStillPressed) {
              this.continuousWalk = false; 
              this.stopAndIdle();
         }
