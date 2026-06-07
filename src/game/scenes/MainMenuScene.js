@@ -1,4 +1,6 @@
 import Phaser from 'phaser';
+// 🔴 1. IMPORT ANG STORE PARA MABASA ANG UI BUTTONS
+import { useGameStore } from '../../stores/gameStore'; 
 
 export class MainMenuScene extends Phaser.Scene {
   constructor() {
@@ -23,6 +25,14 @@ export class MainMenuScene extends Phaser.Scene {
     this.menuOptions.push('OPTIONS');
 
     this.currentIndex = 0; // Kung saan nakaturo ang cursor
+    
+    // 🔴 2. SETUP VARIABLES PARA SA UNIVERSAL CONTROLS
+    this.lastMenuTime = 0; 
+    this.isSelecting = false; // Lock para iwas double-click
+    this.cursors = this.input.keyboard.createCursorKeys();
+    this.enterKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
+    this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+    this.zKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z);
 
     // 3. I-DRAW ANG MENU BOX
     const menuBox = this.add.graphics();
@@ -66,21 +76,49 @@ export class MainMenuScene extends Phaser.Scene {
       this.detailsGroup.addMultiple([detailsBox, titleText, nameText, badgesText, timeText]);
       this.updateDetailsVisibility(); // Itago kung hindi nakatutok sa "CONTINUE"
     }
+  }
 
-    // 7. KEYBOARD CONTROLS (Up, Down, Enter)
-    this.input.keyboard.on('keydown-UP', () => {
-      this.currentIndex = (this.currentIndex > 0) ? this.currentIndex - 1 : this.menuOptions.length - 1;
-      this.updateCursor();
-    });
+  // 🔴 3. DITO BABASAHIN ANG LAHAT NG URI NG CONTROLS
+  update() {
+    if (this.isSelecting) return; // Wag na bumasa ng inputs kung nakapili na
 
-    this.input.keyboard.on('keydown-DOWN', () => {
-      this.currentIndex = (this.currentIndex < this.menuOptions.length - 1) ? this.currentIndex + 1 : 0;
-      this.updateCursor();
-    });
+    const store = useGameStore();
+    const pad = this.input.gamepad ? this.input.gamepad.pad1 : null;
 
-    this.input.keyboard.on('keydown-ENTER', () => {
-      this.selectOption();
-    });
+    const isUpPressed = Phaser.Input.Keyboard.JustDown(this.cursors.up) || store.keys.up || (pad && (pad.up || pad.leftStick.y < -0.5));
+    const isDownPressed = Phaser.Input.Keyboard.JustDown(this.cursors.down) || store.keys.down || (pad && (pad.down || pad.leftStick.y > 0.5));
+    const isActionPressed = 
+      Phaser.Input.Keyboard.JustDown(this.enterKey) || 
+      Phaser.Input.Keyboard.JustDown(this.spaceKey) || 
+      Phaser.Input.Keyboard.JustDown(this.zKey) || 
+      store.keys.action || 
+      store.keys.start || 
+      (pad && (pad.A || pad.start));
+
+    // Delay para hindi mag-hyper scroll
+    if (this.time.now - this.lastMenuTime > 150) {
+      if (isUpPressed) {
+        this.currentIndex = (this.currentIndex > 0) ? this.currentIndex - 1 : this.menuOptions.length - 1;
+        this.updateCursor();
+        
+        store.keys.up = false; // Reset UI
+        this.lastMenuTime = this.time.now;
+      } 
+      else if (isDownPressed) {
+        this.currentIndex = (this.currentIndex < this.menuOptions.length - 1) ? this.currentIndex + 1 : 0;
+        this.updateCursor();
+        
+        store.keys.down = false; // Reset UI
+        this.lastMenuTime = this.time.now;
+      } 
+      else if (isActionPressed) {
+        store.keys.action = false;
+        store.keys.start = false;
+        this.lastMenuTime = this.time.now;
+        
+        this.selectOption();
+      }
+    }
   }
 
   // --- HELPER FUNCTIONS ---
@@ -99,19 +137,22 @@ export class MainMenuScene extends Phaser.Scene {
   }
 
   selectOption() {
+    this.isSelecting = true; // 🔴 I-lock ang menu para di ma-double click
     const selected = this.menuOptions[this.currentIndex];
-    
-    // I-disable muna ang keyboard para hindi mag-double enter
-    this.input.keyboard.removeAllListeners();
 
     if (selected === 'NEW GAME') {
       this.cameras.main.fadeOut(800, 0, 0, 0); // Fade to black
       this.cameras.main.once('camerafadeoutcomplete', () => {
-        this.scene.start('IntroScene'); // Dito na papasok si Prof Birch!
+        
+        // 🔴 KUNG GUSTO MONG LUMABAS ULI YUNG VUE NAME INPUT:
+        // window.dispatchEvent(new CustomEvent('show-name-input'));
+        // window.addEventListener('start-game', () => { this.scene.start('IntroScene'); }, { once: true });
+        
+        // OR KUNG DIRETSO INTRO SCENE LANG:
+        this.scene.start('IntroScene'); 
       });
     } 
     else if (selected === 'CONTINUE') {
-      // Kapag pinili ang continue, lalaktawan si Birch at didiretso sa laro
       this.cameras.main.fadeOut(800, 0, 0, 0);
       this.cameras.main.once('camerafadeoutcomplete', () => {
         alert(`Nilo-load ang file ni ${this.saveData.name}... (Overworld Scene na ito next)`);
@@ -120,7 +161,7 @@ export class MainMenuScene extends Phaser.Scene {
     }
     else if (selected === 'OPTIONS') {
       alert('Wala pang options menu. Balik!');
-      this.scene.restart(); // Temporary restart lang
+      this.isSelecting = false; // I-unlock ulit kung babalik lang pala
     }
   }
 }

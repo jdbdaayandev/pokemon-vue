@@ -11,17 +11,33 @@ import { OverworldScene } from './scenes/OverworldScene';
 
 export const gameConfig = {
   type: Phaser.AUTO,
-  width: 800, 
-  height: 600,
   parent: 'game-container', 
   pixelArt: true,
   roundPixels: false,
+  
+  // 🔴 BAGONG CODE: Dito dapat nakalagay ang width, height, at FIT mode!
+  scale: {
+    mode: Phaser.Scale.FIT,
+    autoCenter: Phaser.Scale.CENTER_BOTH,
+    width: 800,
+    height: 600
+  },
+
   physics: {
     default: 'arcade',
     arcade: {
       gravity: { y: 0 },
       debug: false
     }
+  },
+  
+  input: {
+    gamepad: true 
+  },
+
+  physics: {
+    default: 'arcade',
+    arcade: { gravity: { y: 0 }, debug: false }
   },
   audio: { noAudio: true },
   
