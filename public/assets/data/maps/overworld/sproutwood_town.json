@@ -76,6 +76,7 @@
         {
          "draworder":"topdown",
          "id":5,
+         "locked":true,
          "name":"NPCs",
          "objects":[
                 {
@@ -115,73 +116,6 @@
                  "width":0,
                  "x":343.333333333333,
                  "y":152.666666666667
-                }, 
-                {
-                 "height":0,
-                 "id":41,
-                 "name":"",
-                 "opacity":1,
-                 "properties":[
-                        {
-                         "name":"targetScene",
-                         "type":"string",
-                         "value":"Route1Scene"
-                        }, 
-                        {
-                         "name":"targetX",
-                         "type":"int",
-                         "value":240
-                        }, 
-                        {
-                         "name":"targetY",
-                         "type":"int",
-                         "value":580
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":0.666666666666671,
-                 "x":79.3333333333333,
-                 "y":-27.3333333333333
-                }],
-         "opacity":1,
-         "type":"objectgroup",
-         "visible":true,
-         "x":0,
-         "y":0
-        }, 
-        {
-         "draworder":"topdown",
-         "id":6,
-         "name":"Portals",
-         "objects":[
-                {
-                 "height":15.333333333,
-                 "id":42,
-                 "name":"",
-                 "opacity":1,
-                 "properties":[
-                        {
-                         "name":"targetScene",
-                         "type":"string",
-                         "value":"Route1Scene"
-                        }, 
-                        {
-                         "name":"targetX",
-                         "type":"int",
-                         "value":232
-                        }, 
-                        {
-                         "name":"targetY",
-                         "type":"int",
-                         "value":303
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":31.333333333,
-                 "x":224,
-                 "y":0.666666667
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -220,8 +154,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":7,
- "nextobjectid":47,
+ "nextlayerid":6,
+ "nextobjectid":29,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.2",

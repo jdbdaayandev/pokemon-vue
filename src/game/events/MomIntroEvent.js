@@ -2,34 +2,110 @@ import { useGameStore } from '../../stores/gameStore';
 
 export class MomIntroEvent {
   constructor(scene) {
-    this.scene = scene; 
+    this.scene = scene;
     this.store = useGameStore();
-
-    // Kusang makikinig ang Event na ito sa update loop ng buong laro
+    this.script = [];
+    this.currentStepIndex = 0;
+    
     this.scene.events.on('update', this.update, this);
   }
 
   play() {
-    this.scene.cutscenePhase = 'spawning';
-    this.scene.player.isMoving = true; // 🔒 I-Lock si Brendan
+    const eventData = this.scene.cache.json.get('eventData');
+    if (!eventData || !eventData.mom_intro) {
+      console.error("⚠️ Walang 'mom_intro' script sa events.json!");
+      return;
+    }
 
+    this.script = eventData.mom_intro;
+
+    // Delay ng 1 second bago basahin ang unang linya sa JSON
     this.scene.time.delayedCall(1000, () => {
-      this.startMomCutscene();
+      this.executeNextStep();
     });
   }
 
-  startMomCutscene() {
-    // 1. I-setup si Mom base sa logic natin
-    if (!this.scene.momNpc) {
-      this.scene.momNpc = this.scene.add.sprite(this.scene.player.x + 100, this.scene.player.y - 50, 'npc_1');
-      this.scene.momNpc.setDepth(9998);
-      this.scene.momNpc.isMoving = true;
+  // 🔴 ITO ANG PUSO NG DIRECTOR: Isa-isang babasahin ang bawat block sa JSON
+  // 🔴 ITO ANG PUSO NG DIRECTOR: Isa-isang babasahin ang bawat block sa JSON
+  executeNextStep() {
+    if (this.currentStepIndex >= this.script.length) {
+      // Tapos na ang buong Cutscene!
+      this.scene.isIntroDone = true; // 🔴 FLAG: Para hindi na umulit ang cutscene
+      this.scene.events.off('update', this.update, this);
+      return;
     }
 
-    const tex = this.scene.momNpc.texture.key;
+    const step = this.script[this.currentStepIndex];
+    this.currentStepIndex++;
+
+    switch (step.action) {
+      case 'lock_player':
+        this.scene.player.isMoving = true;
+        this.executeNextStep(); 
+        break;
+
+      case 'unlock_player':
+        this.scene.player.isMoving = false;
+        this.executeNextStep();
+        break;
+
+      case 'spawn_npc':
+        this.spawnMom(step);
+        this.executeNextStep();
+        break;
+
+      case 'walk_down':
+      case 'walk_up':
+      case 'walk_left':
+      case 'walk_right':
+        this.handleWalk(step);
+        break;
+
+      case 'face_up':
+      case 'face_down':
+      case 'face_left':
+      case 'face_right':
+        this.handleFace(step);
+        this.executeNextStep();
+        break;
+
+      case 'dialogue':
+        this.showDialogue(step);
+        break;
+
+      case 'destroy':
+        if (this.scene.momNpc) {
+          this.scene.momNpc.destroy();
+          this.scene.npcs = this.scene.npcs.filter(n => n !== this.scene.momNpc);
+        }
+        this.executeNextStep();
+        break;
+
+      default:
+        console.warn(`Unknown action: ${step.action}`);
+        this.executeNextStep();
+        break;
+    }
+  }
+
+  // ==========================================
+  // MGA TIG-IISANG UTOS NG DIREKTOR
+  // ==========================================
+  
+  spawnMom(step) {
+    let npc = this.scene.npcs.find(n => n.npcId === step.npcId);
+    if (!npc) {
+      const spawnX = this.scene.player.x + (step.offsetX || 0);
+      const spawnY = this.scene.player.y + (step.offsetY || 0);
+      npc = this.scene.add.sprite(spawnX, spawnY, step.texture || 'npc_2');
+      npc.setDepth(9998);
+      npc.isMoving = true;
+      this.scene.momNpc = npc;
+    }
+
+    const tex = npc.texture.key;
     const dirs = ['down', 'left', 'right', 'up'];
     const frames = [0, 4, 8, 12];
-    
     dirs.forEach((dir, i) => {
       const animKey = `${tex}-walk-${dir}`;
       if (!this.scene.anims.exists(animKey)) {
@@ -41,102 +117,70 @@ export class MomIntroEvent {
         });
       }
     });
-
-    this.momOriginalX = this.scene.momNpc.x;
-    this.momOriginalY = this.scene.momNpc.y;
-
-    const targetX = this.scene.player.x;
-    const targetY = this.scene.player.y + 16; 
-
-    // 2. Walk Logic (Down -> Left)
-    const walkLeft = () => {
-      const distX = Math.abs(this.scene.momNpc.x - targetX);
-      this.scene.tweens.add({
-        targets: this.scene.momNpc,
-        x: targetX,
-        duration: distX * 15,
-        onStart: () => { this.scene.momNpc.play(`${tex}-walk-left`, true); },
-        onComplete: () => {
-          if (this.scene.momNpc.anims) this.scene.momNpc.anims.stop();
-          if (this.scene.momNpc.setFrame) this.scene.momNpc.setFrame(12); // Patalikod!
-          
-          this.scene.player.faceDirection('down'); 
-          this.showMomDialogue();
-        }
-      });
-    };
-
-    const walkDown = () => {
-      const distY = Math.abs(this.scene.momNpc.y - targetY);
-      this.scene.tweens.add({
-        targets: this.scene.momNpc,
-        y: targetY,
-        duration: distY * 15, 
-        onStart: () => { this.scene.momNpc.play(`${tex}-walk-down`, true); },
-        onComplete: () => walkLeft() 
-      });
-    };
-
-    walkDown(); 
   }
 
-  showMomDialogue() {
-    // 🔴 3. BASAHIN ANG DIALOGUE MULA SA SCRIPT (events.json)!
-    const eventScript = this.scene.cache.json.get('eventData');
-    
-    if (!eventScript || !eventScript.mom_intro) {
-        console.error("⚠️ Hindi mahanap ang 'mom_intro' sa events.json!");
-        this.store.showDialogue('MOM', ["..."]);
-    } else {
-        const dialogueStep = eventScript.mom_intro.find(step => step.action === 'dialogue');
-        if (dialogueStep) {
-            const formattedDialogue = dialogueStep.text.map(line => 
-                line.replace('{playerName}', this.store.playerName)
-            );
-            this.store.showDialogue(dialogueStep.speaker, formattedDialogue);
-        }
+  handleWalk(step) {
+    const npc = this.scene.momNpc;
+    if (!npc) return this.executeNextStep();
+
+    let targetX = npc.x;
+    let targetY = npc.y;
+    let animDir = '';
+
+    if (step.action === 'walk_down') { targetY += step.distance; animDir = 'down'; }
+    if (step.action === 'walk_up') { targetY -= step.distance; animDir = 'up'; }
+    if (step.action === 'walk_left') { targetX -= step.distance; animDir = 'left'; }
+    if (step.action === 'walk_right') { targetX += step.distance; animDir = 'right'; }
+
+    const tex = npc.texture.key;
+
+    this.scene.tweens.add({
+      targets: npc,
+      x: targetX,
+      y: targetY,
+      duration: step.distance * 15,
+      onStart: () => { npc.play(`${tex}-walk-${animDir}`, true); },
+      onComplete: () => {
+        npc.anims.stop();
+        // 🔴 NEXT SCRIPT NA PAGKABAGSAK SA LOKASYON!
+        this.executeNextStep();
+      }
+    });
+  }
+
+  handleFace(step) {
+    // Para kay Player
+    if (step.target === 'player') {
+      const dir = step.action.replace('face_', ''); // kukunin ang 'right', 'left', etc.
+      this.scene.player.faceDirection(dir);
+      return;
     }
+
+    // Para kay Mom
+    const npc = this.scene.momNpc;
+    if (!npc) return;
+
+    let frame = 0; // down
+    if (step.action === 'face_up') frame = 12;
+    if (step.action === 'face_left') frame = 4;
+    if (step.action === 'face_right') frame = 8;
     
+    if (npc.setFrame) npc.setFrame(frame);
+  }
+
+  showDialogue(step) {
+    const formattedDialogue = step.text.map(line => 
+        line.replace('{playerName}', this.store.playerName)
+    );
+    this.store.showDialogue(step.speaker, formattedDialogue);
     this.scene.cutscenePhase = 'talking';
   }
 
-  // 4. UPDATE LOOP NG EVENT (Para pumuwi si Mom)
   update() {
+    // 🔴 KAPAG NA-ISARA NA ANG DIALOGUE BOX, ITUTULOY ANG NEXT STEP SA JSON!
     if (this.scene.cutscenePhase === 'talking' && !this.store.dialogue.isOpen) {
-      this.scene.cutscenePhase = 'leaving';
-      const tex = this.scene.momNpc.texture.key;
-
-      const returnUp = () => {
-        const distY = Math.abs(this.scene.momNpc.y - this.momOriginalY);
-        this.scene.tweens.add({
-          targets: this.scene.momNpc,
-          y: this.momOriginalY,
-          duration: distY * 15,
-          onStart: () => { this.scene.momNpc.play(`${tex}-walk-up`, true); },
-          onComplete: () => {
-            this.scene.momNpc.destroy(); 
-            this.scene.npcs = this.scene.npcs.filter(npc => npc !== this.scene.momNpc);
-            this.scene.cutscenePhase = 'done'; 
-            this.scene.player.isMoving = false; // 🔓 I-Unlock na si Brendan!
-            
-            // 🔴 Patayin ang pakikinig sa update loop para malinis ang memory
-            this.scene.events.off('update', this.update, this); 
-          }
-        });
-      };
-
-      const returnRight = () => {
-        const distX = Math.abs(this.scene.momNpc.x - this.momOriginalX);
-        this.scene.tweens.add({
-          targets: this.scene.momNpc,
-          x: this.momOriginalX,
-          duration: distX * 15,
-          onStart: () => { this.scene.momNpc.play(`${tex}-walk-right`, true); },
-          onComplete: () => returnUp() 
-        });
-      };
-
-      returnRight(); 
+      this.scene.cutscenePhase = 'running'; 
+      this.executeNextStep();
     }
   }
 }
