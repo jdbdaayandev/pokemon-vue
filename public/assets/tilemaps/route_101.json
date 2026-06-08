@@ -192,6 +192,20 @@
                         }]
                 }, 
                 {
+                 "id":1415,
+                 "properties":[
+                        {
+                         "name":"isLedge",
+                         "type":"bool",
+                         "value":true
+                        }, 
+                        {
+                         "name":"ledgeDir",
+                         "type":"string",
+                         "value":"down"
+                        }]
+                }, 
+                {
                  "id":4934,
                  "properties":[
                         {
