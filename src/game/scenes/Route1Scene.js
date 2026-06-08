@@ -47,6 +47,10 @@ export class Route1Scene extends Phaser.Scene {
 
     // 🔴 3. I-SET ANG DIRECTION NG PLAYER PAGKAPANGANAK
     if (this.player.faceDirection) {
+        // Idagdag ang linyang ito para ma-save sa utak niya ang tamang direksyon!
+        this.player.currentDirection = this.startDirection; 
+        
+        // Saka siya paharapin
         this.player.faceDirection(this.startDirection);
     }
     // ==========================================

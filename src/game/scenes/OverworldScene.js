@@ -55,7 +55,9 @@ export class OverworldScene extends Phaser.Scene {
     this.player = new Player(this, perfectX, perfectY, collisionLayer, groundLayer);
 
     // 🔴 I-SET ANG HARAP NI PLAYER DEPENDE SA KUNG SAAN SIYA GALING
+    // 🔴 I-SET ANG HARAP NI PLAYER DEPENDE SA KUNG SAAN SIYA GALING
     if (this.player.faceDirection) {
+        this.player.currentDirection = this.startDirection; // Idagdag ito!
         this.player.faceDirection(this.startDirection);
     }
     // ==========================================

@@ -173,6 +173,37 @@ export class Player extends Phaser.GameObjects.Sprite {
   }
 
   tryMoveTo(targetX, targetY) {
+    // ==========================================
+    // ⛰️ LEDGE JUMP CHECKER
+    // Titingnan natin kung ang tile na balak hakbangan ay isang bangin
+    // ==========================================
+    if (this.grassLayer) {
+        const targetTile = this.grassLayer.getTileAtWorldXY(targetX, targetY + 4, true);
+        
+        if (targetTile && targetTile.properties && targetTile.properties.isLedge) {
+            const allowedDir = targetTile.properties.ledgeDir || 'down';
+            
+            // Kung tumutugma ang lakad mo sa direksyon ng bangin, TALON!
+            if (this.currentDirection === allowedDir) {
+                let landingX = targetX;
+                let landingY = targetY;
+
+                // Dahil tatalon siya OVER the ledge, dadagdagan natin ng 1 tile pa ang bagsak niya (Total 2 tiles)
+                if (allowedDir === 'down') landingY += this.tileSize;
+                if (allowedDir === 'up') landingY -= this.tileSize;
+                if (allowedDir === 'left') landingX -= this.tileSize;
+                if (allowedDir === 'right') landingX += this.tileSize;
+
+                // Siguraduhing walang NPC o solid wall sa bagsakan niya
+                if (this.canMoveTo(landingX, landingY)) {
+                    this.ledgeJumpTo(landingX, landingY);
+                    return; // Pigilan ang normal na lakad
+                }
+            }
+        }
+    }
+
+    // Normal na lakad (Existing code mo)
     if (!this.collisionLayer || this.canMoveTo(targetX, targetY)) {
         this.moveTo(targetX, targetY);
     } else {
@@ -335,6 +366,118 @@ export class Player extends Phaser.GameObjects.Sprite {
 
     splash.once('animationcomplete', () => {
         splash.destroy();
+    });
+  }
+
+  ledgeJumpTo(landingX, landingY) {
+    this.isMoving = true;
+    const store = useGameStore();
+    
+    // I-play ang walking animation (Emerald-accurate pedaling)
+    this.play(`walk-${this.currentDirection}`, true); 
+
+    const startX = this.x;
+    const startY = this.y;
+    this.jumpProgress = 0; 
+
+    // 👤 DYNAMIC GROUND SHADOW
+    const shadow = this.scene.add.ellipse(startX, startY, 10, 4, 0x000000, 0.35);
+    shadow.setOrigin(0.5, 0.5);
+    shadow.setDepth(this.depth - 1); 
+
+    this.scene.tweens.add({
+      targets: this,
+      jumpProgress: 1,
+      // ==========================================
+      // ⛰️ TIMING FIX: Mas matagal na bagsak!
+      // ==========================================
+      // Taasan natin ang multiplier (mula 1.4 -> 1.8) para sa mas mahabang airtime
+      duration: this.moveSpeed * 3, 
+      
+      // Papalitan natin ng EaseOut para magkaroon ng "heavy landing" deceleration effect
+      ease: 'Cubic.easeOut', 
+
+      onUpdate: () => {
+        // Alamin ang ground position (may deceleration na ito dahil sa Cubic.easeOut)
+        const currentGroundX = startX + (landingX - startX) * this.jumpProgress;
+        const currentGroundY = startY + (landingY - startY) * this.jumpProgress;
+
+        shadow.x = currentGroundX;
+        shadow.y = currentGroundY;
+
+        // Anino scaling
+        const scaleFactor = 1 - (Math.sin(this.jumpProgress * Math.PI) * 0.25);
+        shadow.setScale(scaleFactor);
+
+        // 3. ANG PARABOLIC ARC (Gravity curve)
+        const arc = Math.sin(this.jumpProgress * Math.PI) * 16; // Taasan pa natin ng konti (14->16) ang talon
+        this.x = currentGroundX;
+        this.y = currentGroundY - arc; 
+
+        // Basehan ng depth ay ang lupa
+        this.setDepth(currentGroundY);
+      },
+      onComplete: () => {
+        shadow.destroy();
+
+        // I-sync ang player sa final position
+        this.x = landingX;
+        this.y = landingY;
+        this.setDepth(this.y);
+
+        // ==========================================
+        // ☁️ GBA STYLE: LANDING DUST EFFECT!
+        // Gagawa tayo ng tatlong maliit na bilog na mabilis na fafade out paitaas
+        // ==========================================
+        for (let i = 0; i < 3; i++) {
+            // Randomize ng konti ang pwesto sa paanan
+            const dustX = this.x + Phaser.Math.Between(-6, 6);
+            const dustY = this.y + Phaser.Math.Between(-1, 3);
+            const dust = this.scene.add.circle(dustX, dustY, Phaser.Math.Between(1, 2), 0xffffff, 0.8);
+            dust.setOrigin(0.5, 0.5);
+            dust.setDepth(this.depth + 1); // Sa ibabaw ng player
+
+            // I-tween paitaas at fade out
+            this.scene.tweens.add({
+                targets: dust,
+                y: dustY - Phaser.Math.Between(5, 12),
+                alpha: 0,
+                scale: 0.5,
+                duration: Phaser.Math.Between(250, 400),
+                ease: 'Quad.easeOut',
+                onComplete: () => { dust.destroy(); }
+            });
+        }
+
+        // I-check kung damuhan ang binagsakan para sa overlay/splash
+        this.checkGrassOverlap();
+        if (this.grassLayer) {
+            const tile = this.grassLayer.getTileAtWorldXY(this.x, this.y + 4, true);
+            if (tile && tile.properties && tile.properties.isGrass) {
+                // I-spawn ang grass splash PAGKATAPOS ng landing dust tween
+                this.spawnGrassSplash(this.x, this.y);
+            }
+        }
+
+        // 🎮 Basahin ulit kung may nakadiin pa ring button
+        const pad = this.scene.input.gamepad ? this.scene.input.gamepad.pad1 : null;
+        const isLeftStillPressed = this.cursors.left.isDown || this.wasd.left.isDown || store.keys?.left || (pad && (pad.left || pad.leftStick.x < -0.5));
+        const isRightStillPressed = this.cursors.right.isDown || this.wasd.right.isDown || store.keys?.right || (pad && (pad.right || pad.leftStick.x > 0.5));
+        const isUpStillPressed = this.cursors.up.isDown || this.wasd.up.isDown || store.keys?.up || (pad && (pad.up || pad.leftStick.y < -0.5));
+        const isDownStillPressed = this.cursors.down.isDown || this.wasd.down.isDown || store.keys?.down || (pad && (pad.down || pad.leftStick.y > 0.5));
+
+        if (!isLeftStillPressed && !isRightStillPressed && !isUpStillPressed && !isDownStillPressed) {
+             this.continuousWalk = false; 
+             this.anims.stop(); // Hinto na siya
+             this.stopAndIdle();
+        } else {
+             // Kung may nakadiin, ituloy ang walk animation agad pagkalapag
+             this.play(`walk-${this.currentDirection}`, true);
+        }
+        
+        // Mark as move complete
+        this.isMoving = false;
+      }
     });
   }
 }
