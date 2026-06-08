@@ -31,6 +31,8 @@ export class Route1Scene extends Phaser.Scene {
     if(overheadLayer) overheadLayer.setDepth(9999); 
     if(collisionLayer) collisionLayer.setVisible(false);
 
+    // 🌟 REMOVED: Tinanggal na dito ang grass-splash-anim creation dahil GLOBAL na ito sa PreloadScene!
+
     this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
     this.cameras.main.setZoom(2);
 
@@ -41,7 +43,7 @@ export class Route1Scene extends Phaser.Scene {
     const perfectX = Math.floor(this.startPosition.x / 16) * 16 + 8;
     const perfectY = Math.floor(this.startPosition.y / 16) * 16 + 8;
 
-    this.player = new Player(this, perfectX, perfectY, collisionLayer);
+    this.player = new Player(this, perfectX, perfectY, collisionLayer, groundLayer);
 
     // 🔴 3. I-SET ANG DIRECTION NG PLAYER PAGKAPANGANAK
     if (this.player.faceDirection) {
