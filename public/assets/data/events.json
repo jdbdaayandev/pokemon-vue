@@ -2,18 +2,18 @@
   "mom_intro": [
     { "action": "lock_player" },
     { "action": "spawn_npc", "npcId": "mom", "texture": "npc_2", "offsetX": 64, "offsetY": -48 },
-    { "target": "mom", "action": "walk_down", "distance": 48 },
-    { "target": "mom", "action": "walk_left", "distance": 48 },
-    { "target": "mom", "action": "face_left" },
+    { "npcId": "mom", "action": "walk_down", "distance": 48 },
+    { "npcId": "mom", "action": "walk_left", "distance": 48 },
+    { "npcId": "mom", "action": "face_left" },
     { "target": "player", "action": "face_right" },
     { "action": "dialogue", "speaker": "MOM", "text": [
-      "Oh, {playerName}! Mayroon ka palang laro sa iyong handheld?", 
-      "Naku, late ka na sa usapan ninyo!",
-      "Kingina mo!"
+      "Oh, {playerName}! There you are! You're finally awake.",
+      "Did you forget? You have an appointment with Professor Birch today!",
+      "His assistant called earlier. They've been looking for you at the lab for a while now. You should hurry outside!"
     ] },
-    { "target": "mom", "action": "walk_right", "distance": 48 },
-    { "target": "mom", "action": "walk_up", "distance": 48 },
-    { "action": "destroy", "target": "mom" },
+    { "npcId": "mom", "action": "walk_right", "distance": 48 },
+    { "npcId": "mom", "action": "walk_up", "distance": 48 },
+    { "action": "destroy", "npcId": "mom" },
     { "action": "unlock_player" }
   ]
 }

@@ -18,7 +18,7 @@
   },
   "mom": {
     "name": "Mom",
-    "texture": "npc_mom",
+    "texture": "npc_2",
     "dialogue": [
       "{playerName}! Wake up!",
       "Professor Birch has been waiting for you at his lab.",

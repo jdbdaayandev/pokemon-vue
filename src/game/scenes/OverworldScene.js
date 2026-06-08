@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { Player } from '../entities/Player';
 import { NPC } from '../entities/NPC';
 import { useGameStore } from '../../stores/gameStore';
-import { MomIntroEvent } from '../events/MomIntroEvent.js'; 
+import { EventManager } from '../events/EventManager.js'; // 🌟 BAGO: Pinalitan ang MomIntroEvent ng Universal Manager
 
 export class OverworldScene extends Phaser.Scene {
   constructor() {
@@ -29,6 +29,9 @@ export class OverworldScene extends Phaser.Scene {
   create() {
     const store = useGameStore();
 
+    // 🌟 BAGO: I-initialize ang Universal Event Manager
+    this.eventManager = new EventManager(this);
+
     // 1. MAP SETUP
     const map = this.make.tilemap({ key: 'sproutwood_town' });
     const tileset = map.addTilesetImage('exterior_tileset', 'tiles');
@@ -49,7 +52,7 @@ export class OverworldScene extends Phaser.Scene {
     const perfectX = Math.floor(this.startPosition.x / 16) * 16 + 8;
     const perfectY = Math.floor(this.startPosition.y / 16) * 16 + 8;
 
-    this.player = new Player(this, perfectX, perfectY, collisionLayer);
+    this.player = new Player(this, perfectX, perfectY, collisionLayer, groundLayer);
 
     // 🔴 I-SET ANG HARAP NI PLAYER DEPENDE SA KUNG SAAN SIYA GALING
     if (this.player.faceDirection) {
@@ -75,13 +78,12 @@ export class OverworldScene extends Phaser.Scene {
         }
 
         const npcId = rawId ? rawId.toLowerCase() : 'unknown';
-        // ==========================================
+        
         // 🔴 GHOSTBUSTER: Wag nang i-spawn si Mom kung tapos na ang intro!
-        // ==========================================
         if (npcId === 'mom' && this.isIntroDone) {
-            return; // Laktawan na siya sa loop na ito
+            return; 
         }
-        // ==========================================
+        
         const data = (allNpcData && allNpcData[npcId]) ? allNpcData[npcId] : { texture: 'npc_1', name: 'NPC', dialogue: ['...'] };
 
         let finalTexture = data.texture;
@@ -125,40 +127,81 @@ export class OverworldScene extends Phaser.Scene {
         });
     }
 
+    // ==========================================
+    // 🌟 BAGO: 5. BASAHIN ANG TRIGGERS LAYER MULA SA TILED
+    // ==========================================
+    this.triggers = [];
+    const triggerLayer = map.getObjectLayer('Triggers'); 
+
+    if (triggerLayer) {
+        triggerLayer.objects.forEach(obj => {
+            let eName, reqStage;
+            if (obj.properties) {
+                const props = Array.isArray(obj.properties) ? obj.properties : [];
+                eName = props.find(p => p.name === 'eventName')?.value || obj.properties.eventName;
+                reqStage = props.find(p => p.name === 'requiredStage')?.value || obj.properties.requiredStage;
+            }
+
+            this.triggers.push({
+                x: obj.x, y: obj.y, width: obj.width, height: obj.height,
+                eventName: eName, 
+                requiredStage: reqStage !== undefined ? parseInt(reqStage) : 0, 
+                activated: false
+            });
+        });
+    }
+
     this.cameras.main.startFollow(this.player, true, 1, 1);
     this.cameras.main.fadeIn(1000, 0, 0, 0);
 
-    // 5. SMART CUTSCENE TRIGGER
+    // 6. SMART CUTSCENE TRIGGER
     if (!this.isIntroDone) {
-        const momCutscene = new MomIntroEvent(this);
-        momCutscene.play();
+        // Gagamitin na natin ang lagayan ng global keys mula sa events.json mo!
+        this.eventManager.play('mom_intro');
     }
   }
 
   update() {
     if (this.isTransitioning) return; 
+    const store = useGameStore();
 
     if (this.player) {
         this.player.update();
         this.player.setDepth(this.player.y);
 
-        // 6. PORTAL COLLISION CHECKER
+        // 7. PORTAL COLLISION CHECKER
         if (this.portals) {
             this.portals.forEach(portal => {
                 if (this.player.x >= portal.x && this.player.x <= portal.x + portal.width &&
                     this.player.y >= portal.y && this.player.y <= portal.y + portal.height) {
                     
                     this.isTransitioning = true;
-                    
                     this.cameras.main.fadeOut(500, 0, 0, 0);
                     this.cameras.main.once('camerafadeoutcomplete', () => {
                         this.scene.start(portal.targetScene, {
                             x: portal.targetX,
                             y: portal.targetY,
                             isIntroDone: this.isIntroDone,
-                            direction: 'up' // 🔴 IPASA ANG DIRECTION PAPUNTANG ROUTE 1
+                            direction: 'up' 
                         });
                     });
+                }
+            });
+        }
+
+        // ==========================================
+        // 🌟 BAGO: 8. UNIVERSAL EVENT TRIGGER CHECKER
+        // Titingnan niya kung pumasok si player sa event zone at kung tugma sa storyStage
+        // ==========================================
+        if (this.triggers) {
+            this.triggers.forEach(trigger => {
+                if (!trigger.activated && store.storyStage === trigger.requiredStage) {
+                    if (this.player.x >= trigger.x && this.player.x <= trigger.x + trigger.width &&
+                        this.player.y >= trigger.y && this.player.y <= trigger.y + trigger.height) {
+                        
+                        trigger.activated = true; // Pigilan ang paulit-ulit na pagsabog ng event
+                        this.eventManager.play(trigger.eventName); // Patakbuhin ang nakasulat sa Tiled!
+                    }
                 }
             });
         }
