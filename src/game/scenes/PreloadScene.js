@@ -33,6 +33,9 @@ export class PreloadScene extends Phaser.Scene {
 
     // 3. LOAD TILEMAPS (Para sa unang bayan: Sproutwood Town)
     this.load.image('tiles', '/assets/tilemaps/exterior_tileset.png');
+    this.load.image('grass_overlay', '/assets/tilemaps/grass_overlay.png');
+    this.load.spritesheet('grass_splash_sheet', '/assets/tilemaps/grass_splash.png', { frameWidth: 16, frameHeight: 16 });
+
     this.load.tilemapTiledJSON('sproutwood_town', '/assets/tilemaps/sproutwood_town.json');
     this.load.tilemapTiledJSON('route_1', '/assets/tilemaps/route_101.json');
 
@@ -44,22 +47,36 @@ export class PreloadScene extends Phaser.Scene {
     });
 
     this.load.spritesheet('npc_1', '/assets/sprites/npc/npc_1.png', {
-    frameWidth: 16,
-    frameHeight: 32
-  });
-  this.load.spritesheet('npc_2', '/assets/sprites/npc/npc_2.png', {
-    frameWidth: 16,
-    frameHeight: 32
-  });
+      frameWidth: 16,
+      frameHeight: 32
+    });
+    this.load.spritesheet('npc_2', '/assets/sprites/npc/npc_2.png', {
+      frameWidth: 16,
+      frameHeight: 32
+    });
 
-  // I-load ang JSON file
-  this.load.json('npcData', '/assets/data/npcs.json');
-
-  this.load.json('eventData', 'assets/data/events.json');
+    // I-load ang JSON file
+    this.load.json('npcData', '/assets/data/npcs.json');
+    this.load.json('eventData', 'assets/data/events.json');
   }
 
   create() {
-    // Kapag tapos na ang loading, pumunta muna sa Splash/Title Screen
+    // ==========================================
+    // 🌍 GLOBAL ANIMATIONS SETUP
+    // ==========================================
+    // Ginagawa natin ito rito para isang beses lang i-declare sa buong laro.
+    // Kahit lumipat ka ng Route 1, Route 2, o kahit anong bayan, gagana 'to!
+    if (!this.anims.exists('grass-splash-anim')) {
+      this.anims.create({
+        key: 'grass-splash-anim',
+        // Mag-generate ng frames mula 0 hanggang 3 (4 frames total)
+        frames: this.anims.generateFrameNumbers('grass_splash_sheet', { start: 0, end: 3 }), 
+        frameRate: 12, // Bilis ng talamsik ng dahon (pwedeng taasan kung mabagal)
+        repeat: 0      // Isang beses lang gagawin kada hakbang
+      });
+    }
+
+    // Kapag tapos na ang loading at pag-setup ng anims, dumiretso sa Title Screen
     this.scene.start('SplashScene');
   }
 }

@@ -3,15 +3,24 @@ import Phaser from 'phaser';
 import { useGameStore } from '../../stores/gameStore';
 
 export class Player extends Phaser.GameObjects.Sprite {
-  constructor(scene, x, y, collisionLayer) {
+  constructor(scene, x, y, collisionLayer, grassLayer) {
     super(scene, x, y, 'player_male');
 
     scene.add.existing(this);
     
     this.collisionLayer = collisionLayer;
+    this.grassLayer = grassLayer;
     this.setDepth(5); 
     this.setDepth(this.y);
     this.setOrigin(0.5, 0.75);
+
+    // ==========================================
+    // 🌱 GRASS OVERLAY SETUP (EMERALD STYLE)
+    // ==========================================
+    // Make sure naka-preload ang 'grass_overlay' image (yung jagged para labas ang kamay)
+    this.grassOverlay = scene.add.sprite(x, y, 'grass_overlay');
+    this.grassOverlay.setOrigin(0,0); 
+    this.grassOverlay.setVisible(false);
 
     // --- KEYBOARD INPUTS ---
     this.cursors = scene.input.keyboard.createCursorKeys(); 
@@ -47,6 +56,7 @@ export class Player extends Phaser.GameObjects.Sprite {
 
   update() {
     this.setDepth(this.y);
+    this.checkGrassOverlap();
     const store = useGameStore();
     
     // 🎮 SAFE CHECK: Kunin ang Gamepad kung naka-connect na
@@ -192,6 +202,19 @@ export class Player extends Phaser.GameObjects.Sprite {
     this.targetY = targetY;
     const store = useGameStore(); 
 
+    // ==========================================
+    // 🔴 TIMING FIX: Mag-splash sa kalagitnaan ng hakbang!
+    // ==========================================
+    if (this.grassLayer) {
+        const targetTile = this.grassLayer.getTileAtWorldXY(targetX, targetY + 4, true);
+        
+        if (targetTile && targetTile.properties && targetTile.properties.isGrass) {
+            this.scene.time.delayedCall(this.moveSpeed / 2, () => {
+                this.spawnGrassSplash(targetX, targetY); 
+            });
+        }
+    }
+    
     this.scene.tweens.add({
       targets: this,
       x: targetX,
@@ -273,5 +296,45 @@ export class Player extends Phaser.GameObjects.Sprite {
     if (npc) {
         npc.interact(this.currentDirection);
     }
+  }
+
+  checkGrassOverlap() {
+    if (!this.grassLayer) return;
+
+    const tile = this.grassLayer.getTileAtWorldXY(this.x, this.y + 4, true);
+
+    if (tile && tile.properties && tile.properties.isGrass) {
+        this.grassOverlay.setVisible(true); 
+
+        // ==========================================
+        // 🔴 GRID SNAP MAGIC
+        // Ila-lock natin ang X at Y ng overlay sa saktong kanto ng tile grid.
+        // Ang pag-add ng 8 ay para isentro ang 16x16 sprite.
+        // ==========================================
+        this.grassOverlay.x = tile.pixelX;
+        this.grassOverlay.y = tile.pixelY;
+
+        // Siguraduhing mas mataas ito sa player
+        this.grassOverlay.setDepth(this.y + 10);
+        
+        // Siguraduhing walang crop para buo ang kamay ng player
+        this.setCrop(); 
+    } else {
+        this.grassOverlay.setVisible(false); 
+        this.setCrop(); 
+    }
+  }
+
+  spawnGrassSplash(targetX, targetY) {
+    const splash = this.scene.add.sprite(targetX, targetY, 'grass_splash_sheet'); 
+    
+    splash.setOrigin(0.5, 0.75);
+    splash.setDepth(targetY + 10); 
+
+    splash.play('grass-splash-anim');
+
+    splash.once('animationcomplete', () => {
+        splash.destroy();
+    });
   }
 }
